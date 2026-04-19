@@ -15,7 +15,6 @@ class Dashboard extends Component
     public $yesterDayTotal;
     public $yesterDaySales;
     public $avgTodaySales;
-    public $weeklySales;
     public $yearMonthSales;
     public $recentSales;
     public $topPaymentMethod;
@@ -34,7 +33,6 @@ class Dashboard extends Component
         $this->yesterDaySales = Sales::whereDate('created_at',now()->subDay())->count(); // the count of sales yesterday
         $this->yearMonthSales = Sales::whereMonth('created_at',now()->month)->whereYear('created_at',now()->year) ->sum('total');
         $this->avgTodaySales = Sales::whereDate('created_at',today())->avg('total');
-        $this->weeklySales = Sales::whereBetween('created_at', [now()->subDays(6)->startOfDay(), now()->endOfDay()]);
 
 
         $this->recentSales = Sales::latest()->take(5)->get();
@@ -73,6 +71,12 @@ public function closeReceipt()
         $selectedSale = $this->selectedSaleId
         ? Sales::with('saleItems.item', 'customer')->find($this->selectedSaleId)
         : null;
-        return view('dashboard',compact('selectedSale'));
+
+        $weeklySales = Sales::selectRaw('DATE(created_at) as date, SUM(total) as total')
+        ->whereBetween('created_at', [now()->subDays(6)->startOfDay(), now()->endOfDay()])
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get();
+        return view('dashboard',compact('selectedSale','weeklySales'));
     }
 }

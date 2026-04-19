@@ -44,8 +44,8 @@
                             <input type="text" placeholder="e.g. Ahmed Ali"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200">
                         </div>
-                        <div>
-                            <pre>{{ json_encode($receipt, JSON_PRETTY_PRINT) }}</pre>
+                        
+                            
                         </div>
 
                         <div class="space-y-1">

@@ -5,6 +5,7 @@ namespace App\Livewire\Mangment;
 use App\Models\User as ModelsUser;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
@@ -41,6 +42,10 @@ class EditUsers extends Component implements HasActions, HasSchemas
         ->label('username'),
         TextInput::make('password'),
         TextInput::make('email'),
+        Select::make('role')  
+    ->options([
+        'admin'   => 'Admin',
+        'cashier' => 'Cashier',])
     ])
             ])
             ->statePath('data')

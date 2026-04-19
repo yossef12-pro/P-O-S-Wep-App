@@ -25,13 +25,12 @@
         {{-- ── Stat Cards ── --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-            {{-- Primary --}}
             <div class="stat-card bg-indigo-600 text-white p-5 rounded-2xl shadow">
                 <div class="flex items-start justify-between">
                     <div class="space-y-1">
                         <p class="text-sm font-medium opacity-80">Today's Sales</p>
-                        <p class="text-2xl font-bold tracking-tight">{{$todayTotal}} $</p>
-                        <p class="text-xl font-medium opacity-80 {{$yesterDayTotal < $todayTotal ? 'text-green-500' : 'text-red-500'}}">{{$todayTotal - $yesterDayTotal}} $ vs yesterday</p>
+                        <p class="text-2xl font-bold tracking-tight">{{ $todayTotal }} $</p>
+                        <p class="text-xl font-medium opacity-80 {{ $yesterDayTotal < $todayTotal ? 'text-green-500' : 'text-red-500' }}">{{ $todayTotal - $yesterDayTotal }} $ vs yesterday</p>
                     </div>
                     <div class="p-2.5 rounded-xl bg-white/20">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -39,12 +38,11 @@
                 </div>
             </div>
 
-            {{-- Transactions --}}
             <div class="stat-card bg-white dark:bg-neutral-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-800">
                 <div class="flex items-start justify-between">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-500">Transactions</p>
-                        <p class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{$todaySales}}</p>
+                        <p class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ $todaySales }}</p>
                         <p class="text-xs text-gray-400">Today</p>
                     </div>
                     <div class="p-2.5 rounded-xl bg-gray-100 dark:bg-neutral-800">
@@ -53,12 +51,11 @@
                 </div>
             </div>
 
-            {{-- Monthly Revenue --}}
             <div class="stat-card bg-white dark:bg-neutral-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-800">
                 <div class="flex items-start justify-between">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-500">Monthly Revenue</p>
-                        <p class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{$yearMonthSales}} $</p>
+                        <p class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ $yearMonthSales }} $</p>
                         <p class="text-xs text-gray-400">{{ now()->format('F Y') }}</p>
                     </div>
                     <div class="p-2.5 rounded-xl bg-gray-100 dark:bg-neutral-800">
@@ -67,7 +64,6 @@
                 </div>
             </div>
 
-            {{-- Avg Sale --}}
             <div class="stat-card bg-white dark:bg-neutral-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-800">
                 <div class="flex items-start justify-between">
                     <div class="space-y-1">
@@ -86,21 +82,47 @@
         {{-- ── Chart + Quick Actions + Payment ── --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-            {{-- Weekly Chart --}}
-            <div class="flex items-end gap-2 h-48">
-    @forelse($weeklySales as $day)
-        @php
-            $max = $weeklySales->max('total');
-            $pct = $max > 0 ? ($day->total / $max) * 100 : 0;
-        @endphp
-        <div class="bar-col flex-1 flex flex-col items-center gap-1">
-            <div class="w-full bg-indigo-600 rounded-t-md" style="height: {{ max($pct, 4) }}%"></div>
-            <span class="text-[11px] text-gray-400">{{ \Carbon\Carbon::parse($day->date)->format('D') }}</span>
-        </div>
-    @empty
-        <p class="text-sm text-gray-400 m-auto">No sales this week</p>
-    @endforelse
+            <div class="lg:col-span-2 bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-800 p-5">
+    <h3 class="font-semibold text-base text-gray-900 dark:text-white">Sales This Week</h3>
+    <p class="text-xs text-gray-400 mt-0.5 mb-4">Daily revenue breakdown</p>
+    <div id="weeklyChart"></div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var options = {
+            chart: {
+                type: 'area',
+                height: 200,
+                toolbar: { show: false },
+                background: 'transparent',
+            },
+            series: [{
+                name: 'Revenue',
+                data: @json($weeklySales->pluck('total'))
+            }],
+            xaxis: {
+                categories: @json($weeklySales->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('D')))
+            },
+            colors: ['#4f46e5'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.4,
+                    opacityTo: 0.0,
+                }
+            },
+            stroke: { curve: 'smooth', width: 2 },
+            dataLabels: { enabled: false },
+            grid: { borderColor: '#f1f1f1' },
+            theme: { mode: 'light' }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#weeklyChart"), options);
+        chart.render();
+    });
+</script>
 
             {{-- Quick Actions + Payment --}}
             <div class="space-y-4">
@@ -168,12 +190,12 @@
                                     <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{$recent->invoice_number}}</p>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $recent->invoice_number }}</p>
                                     <p class="text-xs text-gray-400">{{ $recent->customer?->name ?? 'Walk-in' }}</p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{$recent->total}}$</p>
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $recent->total }}$</p>
                                 <p class="text-xs text-gray-400">{{ $recent->created_at->format('h:i A') }}</p>
                             </div>
                             <button wire:click="viewReceipt({{ $recent->id }})"
@@ -227,31 +249,32 @@
                             Out of Stock
                         </div>
                         @forelse($outOfStock as $outStock)
-                        <div class="flex items-center justify-between py-2 px-3 rounded-xl bg-red-50 dark:bg-red-900/10">
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{$outStock->name}}</span>
-                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-500 text-white">OUT</span>
-                        </div>
+                            <div class="flex items-center justify-between py-2 px-3 rounded-xl bg-red-50 dark:bg-red-900/10">
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $outStock->name }}</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-500 text-white">OUT</span>
+                            </div>
                         @empty
+                            <p class="text-xs text-gray-400 text-center py-2">None ✅</p>
+                        @endforelse
                     </div>
-                    @endforelse
+
                     {{-- Low Stock --}}
                     <div class="space-y-2">
                         <div class="flex items-center gap-1.5 text-xs font-semibold text-amber-500 uppercase tracking-wider">
                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             Low Stock
                         </div>
-                        @forelse($lowStock as $LowStock)
-                        <div class="flex items-center justify-between py-2 px-3 rounded-xl bg-amber-50 dark:bg-amber-900/10">
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{$LowStock->name}}</span>
-                            <span class="text-xs text-gray-400">
-                                <span class="font-bold text-amber-500">{{$LowStock->inventory->quantity}}</span> / 10
-                            </span>
-                        </div>
+                        @forelse($lowStock as $lowStockItem)
+                            <div class="flex items-center justify-between py-2 px-3 rounded-xl bg-amber-50 dark:bg-amber-900/10">
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $lowStockItem->name }}</span>
+                                <span class="text-xs text-gray-400">
+                                    <span class="font-bold text-amber-500">{{ $lowStockItem->inventory->quantity }}</span> left
+                                </span>
+                            </div>
                         @empty
+                            <p class="text-xs text-gray-400 text-center py-2">None ✅</p>
+                        @endforelse
                     </div>
-                    @endforelse
-
-                    <p class="text-sm text-gray-400 text-center py-6">All items are well stocked ✅</p>
 
                 </div>
             </div>

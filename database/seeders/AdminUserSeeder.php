@@ -18,6 +18,7 @@ class AdminUserSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password123'),
+                'role' => 'admin'
             ]
         );
         User::factory() -> count(10) ->create();

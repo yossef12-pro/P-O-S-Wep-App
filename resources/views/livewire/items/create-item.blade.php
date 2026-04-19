@@ -1,10 +1,10 @@
 <div>
-    <form wire:submit="create">
+    <form wire:submit="save">
         {{ $this->form }}
 
-        <button type="submit">
+        <x-filament::button type='submit' color="info" class="text-xl rounded-xl border-black border-2 ml-2 shadow-xl">
             Submit
-        </button>
+        </x-filament::button>
     </form>
 
     <x-filament-actions::modals />

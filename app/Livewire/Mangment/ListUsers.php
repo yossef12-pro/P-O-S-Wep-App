@@ -31,6 +31,7 @@ class ListUsers extends Component implements HasActions, HasSchemas, HasTable
                 TextColumn::make('email'),
                 TextColumn::make('password'),
             TextColumn::make('created_at'),
+            TextColumn::make('role') -> badge(),
             ])
             ->filters([
                 //

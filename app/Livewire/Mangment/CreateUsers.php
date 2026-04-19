@@ -5,6 +5,7 @@ namespace App\Livewire\Mangment;
 use App\Models\User as ModelsUser;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
@@ -39,6 +40,13 @@ class CreateUsers extends Component implements HasActions, HasSchemas
         ->label('username'),
         TextInput::make('password'),
         TextInput::make('email'),
+        Select::make('role')  
+    ->options([
+        'admin'   => 'Admin',
+        'cashier' => 'Cashier',
+    ])
+    ->default('cashier')
+    ->required(),
     ])
             ])
             ->statePath('data')
@@ -48,7 +56,7 @@ class CreateUsers extends Component implements HasActions, HasSchemas
     public function create(): void
     {
         $data = $this->form->getState();
-
+        $data['password'] = bcrypt($data['password']);
         $record = ModelsUser::create($data);
 
         $this->form->model($record)->saveRelationships();
